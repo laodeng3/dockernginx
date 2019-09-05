@@ -1,25 +1,27 @@
-#新生成的镜像是基于sshd:dockerfile镜像
-FROM sshd:dockerfile
-MAINTAINER by Steven
-#安装wget
-RUN yum install -y wget
-WORKDIR /usr/local/src
-#下载并解压源码包
-RUN wget http://apache.fayea.com/httpd/httpd-2.4.17.tar.gz
-RUN tar -zxvf httpd-2.4.17.tar.gz
-WORKDIR httpd-2.4.17
-#编译安装apache
-RUN yum install -y gcc make apr-devel apr apr-util apr-util-devel pcre-devel
-RUN ./configure --prefix=/usr/local/apache2  --enable-mods-shared=most  --enable-so
-RUN make
-RUN make install
-#修改apache配置文件
-RUN sed -i 's/#ServerName www.example.com:80/ServerName localhost:80/g' /usr/local/apache2/conf/httpd.conf
-#启动apache服务
-RUN /usr/local/apache2/bin/httpd
-#复制服务启动脚本并设置权限
-ADD run.sh /usr/local/sbin/run.sh
-RUN chmod 755 /usr/local/sbin/run.sh
-#开放80端口
+# base image
+FROM centos
+#
+# MAINTAINER
+MAINTAINER 1060789060@qq.com
+#
+# # put nginx-1.12.2.tar.gz into /usr/local/src and unpack nginx
+ADD nginx-1.16.1.tar.gz /usr/local/src
+#
+# running required command
+RUN yum install -y gcc gcc-c++ glibc make autoconf openssl openssl-devel 
+RUN yum install -y libxslt-devel -y gd gd-devel GeoIP GeoIP-devel pcre pcre-devel
+RUN useradd -M -s /sbin/nologin nginx
+#
+# mount a dir to container
+#VOLUME ["/data"]
+# change dir to /usr/local/src/nginx-1.12.2
+WORKDIR /usr/local/src/nginx-1.16.1
+#
+# execute command to compile nginx
+ RUN ./configure --user=nginx --group=nginx --prefix=/usr/local/nginx --with-file-aio --with-http_ssl_module --with-http_realip_module --with-http_addition_module --with-http_xslt_module --with-http_image_filter_module --with-http_geoip_module --with-http_sub_module --with-http_dav_module --with-http_flv_module --with-http_mp4_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_auth_request_module --with-http_random_index_module --with-http_secure_link_module --with-http_degradation_module --with-http_stub_status_module && make && make install
+#
+ENV PATH /usr/local/nginx/sbin:$PATH
+
 EXPOSE 80
-CMD ["/usr/local/sbin/run.sh"]
+
+CMD /bin/sh -c 'nginx -g "daemon off;"'
