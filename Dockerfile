@@ -12,6 +12,7 @@ RUN yum install -y gcc gcc-c++ glibc make autoconf openssl openssl-devel
 RUN yum install -y libxslt-devel -y gd gd-devel GeoIP GeoIP-devel pcre pcre-devel
 RUN yum install -y initscripts net-tools vim openssh-server 
 RUN useradd -M -s /sbin/nologin nginx
+
 #
 # mount a dir to container
 #VOLUME ["/data"]
